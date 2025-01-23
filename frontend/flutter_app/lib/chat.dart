@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 /// ユーザーがログイン済みのときに表示するホーム画面
 class ChatPage extends StatefulWidget {
@@ -14,6 +16,38 @@ class _ChatPageState extends State<ChatPage> {
   final _firestore = FirebaseFirestore.instance;
   final _textController = TextEditingController();
   final notebookId = 'tekitotekito'; // 画面遷移時に受け取るなど
+
+  // Flutterアプリからの一例
+  Future<void> callChatEndpoint() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return;
+    final chatHistory = [
+      // {"role": "user", "content": "こんにちは"},
+      // {"role": "assistant", "content": "いかがされましたか？"},
+    ];
+
+    final body = {
+      "prompt": text,
+      "chat_history": chatHistory,
+    };
+
+    final response = await http.post(
+      Uri.parse('https://chatbot-api-514173068988.asia-northeast1.run.app/chat'),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    // 受信時: bodyBytes を utf8.decode する
+    final decodedBody = utf8.decode(response.bodyBytes);
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(decodedBody);
+      print("Chat response: ${responseData["response"]}");
+    } else {
+      print("Error: ${response.statusCode} - $decodedBody");
+    }
+  }
 
   /// Firestoreにデータを追加する
   Future<void> _addMessage() async {
@@ -37,10 +71,11 @@ class _ChatPageState extends State<ChatPage> {
           .add({
         'content': text,
         'createdAt': FieldValue.serverTimestamp(),
-        'role': "user",
+        // ここが重要: roleを"user"にすることで、バックエンド側の /question 処理が動く
+        'role': 'user',
         'loading': false,
-        'ragFileIds': null,
-        'status': "success"
+        'ragFileIds': [], // 選択中のソースファイルがあればIDの配列を入れておく（空でもOK）
+        'status': 'success',
       });
       _textController.clear();
     } catch (e) {
@@ -168,7 +203,8 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.send),
-                  onPressed: _addMessage,
+                  // onPressed: _addMessage,
+                  onPressed: callChatEndpoint,
                 ),
               ],
             ),
