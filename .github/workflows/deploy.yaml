@@ -2,7 +2,9 @@ name: Deploy to Cloud Run
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - develop
 
 jobs:
   build-and-deploy:
@@ -27,16 +29,10 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       # 4. Cloud Run にデプロイ
-      - name: Deploy genai-backend
+      - name: Deploy backend
         run: |
-          # 今回はビルド時ではなく、実行時に環境変数をセットする
-          # (--set-env-vars は「実行時」の環境変数指定)
-          # SERVICE_ACCOUNT はチュートリアル通り
-          # FLASK_PROJECT_ID は ${{ secrets.GCP_PROJECT_ID }} を割り当て
-
-          gcloud run deploy genai-backend \
-            --source ./2024/genai-app-patterns/src/genai-backend \
+          gcloud run deploy backend \
+            --source ./backend/src/chatbot \
             --region asia-northeast1 \
-            --service-account genai-backend-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
-            --set-env-vars=FLASK_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+            # --service-account genai-backend-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
             --no-allow-unauthenticated
