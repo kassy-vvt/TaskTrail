@@ -108,3 +108,64 @@ gcloud auth application-default login
 
 - コードの変更は自動的にリロードされます（`--reload`フラグ有効）
 - ログは`docker compose logs -f`で確認できます
+
+
+# アーキテクチャ
+## レイヤードアーキテクチャ構成
+
+
+```bash
+├── Http/                 # プレゼンテーション層 - APIエンドポイント管理
+│   └── Api/
+│       ├── Routes.py     # ルーティング定義
+│       └── Schemas.py    # リクエスト/レスポンススキーマ
+├── Services/             # アプリケーション層 - ビジネスロジック
+│   └── ChatService.py    # チャット処理のコアサービス
+├── Repositories/         # インフラ層 - データ永続化
+│   └── ChatRepository.py # チャットの履歴の保存や復元を担当
+├── UseCases/             # ドメイン層 - ユースケース実装
+│   ├── ObjectiveUseCase.py
+│   └── ObjectiveUseCaseInput.py
+├── Config/               # 設定管理
+│   └── LlmConfig.py      # LLM設定定数
+└── Infrastructure/       # 外部アダプター層
+    └── Gateways/
+        └── VertexAiGateway.py  # Vertex AI連携実装
+```
+
+
+## `Http/` (Interface Layer)
+
+- APIエンドポイントのルーティングを担当
+- リクエスト/レスポンスのバリデーションを実施
+- 外部との通信プロトコルを抽象化
+
+## `Services/` (Application Layer)
+
+- ビジネスロジックのコアを実装
+- ドメイン層とインフラ層の協調を管理
+- トランザクション境界を定義
+
+## `Repositories/` (Infrastructure Layer)
+
+- データ永続化の詳細を抽象化
+- Firestoreなど外部サービスとの接続を管理
+- ドメインオブジェクトの永続化手法を隠蔽
+
+## `UseCases/` (Domain Layer)
+
+- ビジネスルールを具現化
+- ドメインエキスパートの知識を反映
+- アプリケーション固有のワークフローを定義
+
+## `Config/` (Cross-Cutting)
+
+- 環境設定と定数管理を集中化
+- 依存性注入の構成を提供
+- アプリケーション全体の設定を一元管理
+
+## `Infrastructure/` (External Adapters)
+
+- 外部サービスとの連携を実装
+- サードパーティライブラリの詳細を隠蔽
+- ドメイン層が技術的詳細に依存しないよう抽象化
