@@ -27,6 +27,3 @@ app.include_router(router)
 
 # アプリケーション起動時にロギング設定を行う
 setup_logging()
-
-# アプリケーション起動時のログ
-logger.info(f"Application started with project ID: {PROJECT_ID} in location: {VERTEX_AI_LOCATION}")
