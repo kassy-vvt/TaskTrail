@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hackathon_test1/viewmodel/goal_viewmodel.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hackathon_test1/view/common/snackbar_helper.dart';
 
-class AddGoalButton extends StatelessWidget {
-  final GoalViewModel viewModel;
-
-  const AddGoalButton({super.key, required this.viewModel});
+class AddGoalButton extends ConsumerWidget {
+  const AddGoalButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton.icon(
       onPressed: () {
         showDialog(
@@ -31,12 +30,19 @@ class AddGoalButton extends StatelessWidget {
                   child: const Text('キャンセル'),
                 ),
                 TextButton(
-                  onPressed: () {
-                    final goal = goalController.text.trim();
-                    if (goal.isNotEmpty) {
-                      viewModel.addGoal(goal, context);
+                  onPressed: () async {
+                    final goalTitle = goalController.text.trim();
+                    if (goalTitle.isNotEmpty) {
+                      // ref
+                      //     .read(goalViewModelProvider.notifier)
+                      //     .setGoalTitle(goalTitle);
+                      SnackbarHelper.show(context, '目標を追加しました');
+                    } else {
+                      SnackbarHelper.show(context, '目標が未入力です');
                     }
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   },
                   child: const Text('追加'),
                 ),

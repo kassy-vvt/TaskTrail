@@ -1,73 +1,48 @@
 // lib/viewmodel/chat_viewmodel.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hackathon_test1/model/chat_message.dart';
-import 'package:hackathon_test1/view/common/snackbar_helper.dart';
+import 'package:hackathon_test1/model/firestore_models.dart';
+import 'package:hackathon_test1/repository/firestore_chat_repository.dart';
 
-final chatViewModelProvider = ChangeNotifierProvider((ref) => ChatViewModel());
+final chatViewModelProvider =
+    StateNotifierProvider<ChatViewModel, List<Chat>>((ref) => ChatViewModel());
 
-class ChatViewModel extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class ChatViewModel extends StateNotifier<List<Chat>> {
+  final ChatRepository _chatRepository = ChatRepository();
   final TextEditingController textController = TextEditingController();
   String? selectedGoalId;
 
+  ChatViewModel() : super([]);
+
   // メッセージを Firestore に追加
-  Future<void> addMessage(String notebookId, BuildContext context) async {
-    final text = textController.text.trim();
-    if (text.isEmpty) return;
+  // Future<void> addMessage(String goalId, BuildContext context) async {
+  //   final currentUser = getCurrentUser(context);
+  //   if (currentUser == null) return;
+  //   if (!context.mounted) return;
 
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      SnackbarHelper.show(context, 'ログインしていません');
-      return;
-    }
+  //   final text = textController.text.trim();
+  //   if (text.isEmpty) return;
 
-    try {
-      await _firestore
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('notebooks')
-          .doc(notebookId)
-          .collection('chat')
-          .add(ChatMessage(
-            content: text,
-            role: "user",
-            createdAt: DateTime.now(),
-          ).toJson());
-      textController.clear();
-      SnackbarHelper.show(context, 'メッセージが送信されました');
-    } catch (e) {
-      SnackbarHelper.show(context, 'Firestore 書き込みエラー: $e');
-    }
-  }
+  //   try {
+  //     // 本来、UIに通知するならここでstateを更新する
+  //     // しかし、今回は firestore を監視し、Firestore の変更を検知して UI を更新するため
+  //     // ここで state を更新する必要はない
+  //     await _chatRepository.addMessage(currentUser.uid, goalId, text);
+  //     textController.clear();
+  //     SnackbarHelper.show(context, 'メッセージが送信されました');
+  //   } catch (e) {
+  //     SnackbarHelper.show(context, 'Firestore 書き込みエラー: $e');
+  //   }
+  // }
 
-  // チャットメッセージの Stream を取得
-  Stream<QuerySnapshot<Object?>>? getChatStream(String userId, String? goalId) {
-    if (goalId == null) return const Stream.empty();
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('goals')
-        .doc(goalId)
-        .collection('chat')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
-  }
+  // // チャットメッセージの Stream を取得
+  // Stream<QuerySnapshot<Object?>>? getChatStream(String userId, String? goalId) {
+  //   if (goalId == null) return const Stream.empty();
+  //   return _chatRepository.getChatStream(userId, goalId);
+  // }
 
-  // 目標の Stream を取得
-  Stream<QuerySnapshot<Object?>>? getGoalStream(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('goals')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
-  }
-
-  void setSelectedGoalId(String goalId) {
-    selectedGoalId = goalId;
-    notifyListeners();
-  }
+  // // 目標の Stream を取得
+  // Stream<QuerySnapshot<Object?>>? getGoalStream(String userId) {
+  //   return _chatRepository.getGoalStream(userId);
+  // }
 }
