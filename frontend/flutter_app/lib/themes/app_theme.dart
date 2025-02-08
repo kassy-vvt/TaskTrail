@@ -8,7 +8,7 @@ enum ThemeType {
 class AppTheme {
   static TextTheme getTextTheme(ThemeType type) {
     const lightTextStyle = TextStyle(color: Colors.black);
-    const darkTextStyle = TextStyle(color: Colors.white);
+    const darkTextStyle = TextStyle(color: Colors.blueGrey);
     switch (type) {
       case ThemeType.light:
         return const TextTheme(
@@ -65,5 +65,16 @@ class AppTheme {
     ),
     iconTheme: const IconThemeData(color: Colors.white),
     textTheme: getTextTheme(ThemeType.dark),
+    inputDecorationTheme: InputDecorationTheme(
+      // エラー時の枠線
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red),
+      ),
+      // ヒントテキストのスタイル
+      hintStyle: const TextStyle(color: Colors.blueGrey),
+      // ラベルテキストのスタイル
+      labelStyle: const TextStyle(color: Colors.blueGrey),
+    ),
   );
 }
