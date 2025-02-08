@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemeToggleButton extends StatefulWidget {
+final isDarkModeProvider = StateProvider<bool>((ref) => false);
+
+class ThemeToggleButton extends ConsumerStatefulWidget {
   const ThemeToggleButton({super.key});
 
   @override
-  State<ThemeToggleButton> createState() => _ThemeToggleButtonState();
+  ConsumerState<ThemeToggleButton> createState() => _ThemeToggleButtonState();
 }
 
-class _ThemeToggleButtonState extends State<ThemeToggleButton> {
-  bool _isDarkMode = false; // ダークモードの状態
-
+class _ThemeToggleButtonState extends ConsumerState<ThemeToggleButton> {
   @override
   void initState() {
     super.initState();
-    _loadThemeMode(); // 保存されたテーマ設定を読み込む
-  }
-
-  Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    });
   }
 
   Future<void> _saveThemeMode(bool isDarkMode) async {
@@ -31,29 +24,35 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Switch(
-      value: _isDarkMode,
-      onChanged: (value) {
-        setState(() {
-          _isDarkMode = value;
-          _saveThemeMode(value); // 設定を保存
+    final isDarkMode = ref.watch(isDarkModeProvider); // isDarkMode の状態を監視
+    final isDarkModeNotifier =
+        ref.watch(isDarkModeProvider.notifier); // isDarkMode を更新するための notifier
 
-          // ThemeDataにはchangeThemeメソッドはない。Themeウィジェットでラップする。
-          // これにより、新しいテーマで下のウィジェットツリーが再構築される。
-          if (_isDarkMode) {
-            Theme.of(context).copyWith(
-              scaffoldBackgroundColor: Colors.black,
-              brightness: Brightness.dark,
-            ); // 他のコンポーネントのために重要); // ダークテーマを適用
-          } else {
-            Theme.of(context).copyWith(
-              scaffoldBackgroundColor: Colors.white,
-              // ... 他のライトテーマ設定
-              brightness: Brightness.light, // 他のコンポーネントのために重要
-            );
-          }
+    // return Switch(
+    //   value: isDarkMode,
+    //   onChanged: (value) {
+    //     setState(
+    //       () {
+    //         isDarkModeNotifier.state = value;
+    //         _saveThemeMode(value); // 設定を保存
+    //         print('isDarkMode : $isDarkMode');
+    //         print('Brightness: ${Theme.of(context).brightness}');
+    //       },
+    //     );
+    //   },
+    // );
+
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          isDarkModeNotifier.state = !isDarkMode;
+          _saveThemeMode(!isDarkMode); // 設定を保存
         });
       },
+      icon: Icon(
+        isDarkMode ? Icons.brightness_7 : Icons.brightness_3, // アイコンを変更
+        color: Theme.of(context).iconTheme.color, // テーマに合わせた色
+      ),
     );
   }
 }
