@@ -28,20 +28,6 @@ class _ThemeToggleButtonState extends ConsumerState<ThemeToggleButton> {
     final isDarkModeNotifier =
         ref.watch(isDarkModeProvider.notifier); // isDarkMode を更新するための notifier
 
-    // return Switch(
-    //   value: isDarkMode,
-    //   onChanged: (value) {
-    //     setState(
-    //       () {
-    //         isDarkModeNotifier.state = value;
-    //         _saveThemeMode(value); // 設定を保存
-    //         print('isDarkMode : $isDarkMode');
-    //         print('Brightness: ${Theme.of(context).brightness}');
-    //       },
-    //     );
-    //   },
-    // );
-
     return IconButton(
       onPressed: () {
         setState(() {
