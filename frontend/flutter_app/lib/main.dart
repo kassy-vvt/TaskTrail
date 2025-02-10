@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'view/auth_gate.dart'; // AuthGate に分割
 import 'view/chat_page.dart'; // チャット画面
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -26,7 +28,10 @@ void main() async {
   );
 
   // 実行時に権限をリクエスト
-  await requestNotificationPermission();
+  // 実行箇所付近の例
+  if (!kIsWeb && !Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) {
+    await requestNotificationPermission();
+  }
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
