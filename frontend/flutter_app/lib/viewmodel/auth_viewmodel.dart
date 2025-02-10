@@ -74,7 +74,14 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     if (kIsWeb) {
       // Webの場合: signInWithPopup() が使える
-      await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
+      final userCredential = await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
+
+      // 返ってきたユーザー認証情報から OAuthCredential を取り出す
+      final oauthCredential = userCredential.credential as OAuthCredential?;
+
+      // accessToken が存在すれば、Android/iOS と同様に _accessToken にセット
+      _accessToken = oauthCredential?.accessToken;
+      debugPrint("Web AccessToken : $_accessToken");
     } else {
       // iOS/Androidの場合: google_sign_in を使う
       try {
