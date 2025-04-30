@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hackathon_test1/view/chat_tab_widget.dart';
 import 'package:hackathon_test1/view/common/add_goal_button.dart';
+import 'package:hackathon_test1/view/common/theme_toggle_button.dart';
 import 'package:hackathon_test1/view/tasks_tab_widget.dart';
 import 'package:hackathon_test1/viewmodel/chat_viewmodel.dart';
 import 'package:hackathon_test1/viewmodel/goal_viewmodel.dart';
@@ -33,6 +34,7 @@ class ChatPage extends ConsumerWidget {
         appBar: AppBar(
           title: Text(chatViewModel.selectedGoalText ?? 'Task Trail'),
           actions: [
+            const ThemeToggleButton(),
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () async {
@@ -49,7 +51,6 @@ class ChatPage extends ConsumerWidget {
           ),
         ),
         drawer: Drawer(
-          backgroundColor: Colors.white,
           child: SafeArea(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -71,10 +72,6 @@ class ChatPage extends ConsumerWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: AddGoalButton(viewModel: goalViewModel),
                         ),
-                        // const Padding(
-                        //   padding: EdgeInsets.all(8.0),
-                        //   child: ThemeToggleButton(),
-                        // )
                       ],
                     ),
                   ),
